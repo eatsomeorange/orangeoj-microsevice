@@ -1,6 +1,6 @@
 package com.taotao.orangebackendjudgeservice;
 
-import org.mybatis.spring.annotation.MapperScan;
+import com.taotao.orangebackendjudgeservice.rabbitmq.InitRabbitMq;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -16,8 +16,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = {"com.taotao.orangebackendserviceclient.service"})
 public class OrangeBackendJudgeServiceApplication {
-
     public static void main(String[] args) {
+        InitRabbitMq.doInit();
         SpringApplication.run(OrangeBackendJudgeServiceApplication.class, args);
     }
 

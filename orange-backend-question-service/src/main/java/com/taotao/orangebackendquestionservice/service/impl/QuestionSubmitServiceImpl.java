@@ -16,6 +16,7 @@ import com.taotao.orangebackendmodel.model.enums.QuestionSubmitLanguageEnum;
 import com.taotao.orangebackendmodel.model.enums.QuestionSubmitStatusEnum;
 import com.taotao.orangebackendmodel.model.vo.QuestionSubmitVO;
 import com.taotao.orangebackendquestionservice.mapper.QuestionSubmitMapper;
+import com.taotao.orangebackendquestionservice.rabbitmq.MyMessageProducer;
 import com.taotao.orangebackendquestionservice.service.QuestionService;
 import com.taotao.orangebackendquestionservice.service.QuestionSubmitService;
 import com.taotao.orangebackendserviceclient.service.JudgeFeignClient;
@@ -49,6 +50,9 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
     @Resource
     @Lazy
     private JudgeFeignClient judgeFeignClient;
+
+    @Resource
+    private MyMessageProducer myMessageProducer;
 
     /**
      * 提交题目
@@ -86,11 +90,13 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         if (!save){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "数据插入失败");
         }
+        //发送消息
         Long questionSubmitId = questionSubmit.getId();
+        myMessageProducer.sendMessage("code_exchange", "my_routingKey", String.valueOf(questionSubmitId));
         // 执行判题服务
-        CompletableFuture.runAsync(() -> {
-            judgeFeignClient.doJudge(questionSubmitId);
-        });
+//        CompletableFuture.runAsync(() -> {
+//            judgeFeignClient.doJudge(questionSubmitId);
+//        });
         return questionSubmitId;
     }
 
